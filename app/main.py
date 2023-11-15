@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_versioning import VersionedFastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 from redis import asyncio as aioredis
 from sqladmin import Admin
 
@@ -16,16 +17,22 @@ from app.database import engine
 from app.hotels.router import router as router_hotels
 from app.images.router import router as router_images
 from app.pages.router import router as router_pages
+from app.prometheus.router import router as router_prometheus
 from app.users.router import router as router_users
 from app.logger import logger
 
-app = FastAPI()
+app = FastAPI(
+    title="Booker", 
+    version="1.0",
+    root_path="/api"
+)
 
 
 app.include_router(router_users)
 app.include_router(router_bookings)
 app.include_router(router_hotels)
 app.include_router(router_images)
+app.include_router(router_prometheus)
 
 
 # Подключение CORS, чтобы запросы к API могли приходить из браузера
@@ -76,6 +83,12 @@ def startup():
     
 app.mount("/static", StaticFiles(directory="app/static"), "static")
 
+# Подключение эндпоинта для отображения метрик для их дальнейшего сбора Прометеусом
+instrumentator = Instrumentator(
+    should_group_status_codes=False,
+    excluded_handlers=[".*admin.*", "/metrics"],
+)
+instrumentator.instrument(app).expose(app)
 
 # Admin connection
 admin = Admin(app, engine, authentication_backend=authentication_backend)
