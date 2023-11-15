@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+venv3/
+env/
+bin/
+lib/
+include/
+*.sqlite
+mock_*.json
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Docker
+docker-compose.override.yml
+.docker/
+
+# VSCode
+.vscode/
+
+# Logs
+*.log
+
+# Redis dump file
+dump.rdb
+
+# Ignore Docker images, containers, and volumes
+*.env
+.env.local
+
+

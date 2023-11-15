@@ -1,0 +1,47 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:15
+    container_name: booker_db
+    env_file:
+      - .env_docker
+    ports:
+      - 5432:5432
+
+  redis:
+    image: redis:7
+    container_name: booker_redis
+
+  booker:
+    build: 
+      context: .
+    container_name: booker_app
+    env_file:
+      - .env_docker
+    depends_on:
+      - db
+      - redis
+    command: ["/booker/docker/app.sh"]
+    ports:
+      - 9000:8000
+
+  celery:
+    build: 
+      context: .
+    container_name: booker_celery
+    depends_on:
+      - redis
+    command: ["/booker/docker/celery.sh", "celery"]
+    env_file:
+      - .env_docker
+
+  flower:
+    build: 
+      context: .
+    container_name: booker_flower
+    depends_on:
+      - redis
+    command: ["/booker/docker/celery.sh", "flower"]
+    env_file:
+      - .env_docker
